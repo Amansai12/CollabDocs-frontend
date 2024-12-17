@@ -274,7 +274,7 @@ function DocumentViewer() {
     };
     
     ws.onerror = (error: Event) => {
-      console.error('WebSocket Error:', error);
+      console.error(error);
       setLoading(false);
       toast({
         title: "Connection Error",
