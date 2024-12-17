@@ -43,7 +43,7 @@ import {
     FileLock2,
     Lock
 } from "lucide-react";
-import { BACKEND_URL } from "@/config";
+import { BACKEND_URL, BACKEND_WEBSOCKET_URL } from "@/config";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Navbar from "@/components/Navbar";
 import { Badge } from "@/components/ui/badge";
@@ -187,7 +187,7 @@ function DocumentViewer() {
     if (!auth?.user?.id) return null;
 
     setLoading(true);
-    const ws = new WebSocket("ws://localhost:3000");
+    const ws = new WebSocket(`${BACKEND_WEBSOCKET_URL}`);
     
     ws.onopen = () => {
       setSocket(ws);
