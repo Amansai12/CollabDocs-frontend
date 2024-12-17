@@ -552,7 +552,7 @@ function DocumentViewer() {
                 },
                 withCredentials: true,
             });
-            const link = `${"http:localhost:5173"}/verify/${res.data.token}`;
+            const link = `${process.env.BASE_URL}/verify/${res.data.token}`;
             navigator.clipboard.writeText(link)
             .then(() => {
                 toast({
