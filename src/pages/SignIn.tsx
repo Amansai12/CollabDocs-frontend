@@ -148,7 +148,6 @@ export const SigninPage = () => {
     try {
       const response = await axios.post(`${BACKEND_URL}/user/signin`, formData);
       localStorage.setItem('token', response.data.token);
-      console.log(response.data);
       setAuth(response.data);
       const verification = localStorage.getItem('verification');
       if(verification) {
@@ -219,7 +218,7 @@ export const SigninPage = () => {
   };
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-white overflow-hidden">
+    <div className="relative flex px-2 items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-white overflow-hidden">
       <CollaborativeBackground />
       <motion.div
         initial="initial"

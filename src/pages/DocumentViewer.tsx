@@ -49,6 +49,7 @@ import Navbar from "@/components/Navbar";
 import { Badge } from "@/components/ui/badge";
 import CurrentUsers from "@/components/CurrentUsers";
 import DocumentVersions from "@/components/DocumentVersions";
+import React from "react";
 
 
 interface UserType {
@@ -103,7 +104,117 @@ interface WebSocketMessage {
   lock?: boolean;
   data?: string;
   users?: string[];
+
 }
+
+
+
+  export const SaveVersionComponent = React.memo(
+    ({ 
+      versionLoading, 
+      myRole, 
+      openVersionDialog 
+    }:{versionLoading: boolean;
+        myRole: string;
+        openVersionDialog: () => void;}) => {
+      console.log("SaveVersionComponent rendered"); // Keep for debugging
+      return (
+        <Button
+          disabled={versionLoading || myRole === 'VIEWER'}
+          className="bg-blue-600 text-white hover:bg-blue-700"
+          onClick={openVersionDialog}
+        >
+          <History />
+          Save Version
+        </Button>
+      );
+    },
+    // Custom comparison function to prevent unnecessary re-renders
+    (prevProps, nextProps) => {
+      return (
+        prevProps.versionLoading === nextProps.versionLoading &&
+        prevProps.myRole === nextProps.myRole
+      );
+    }
+  );
+  export const ShareLinkButton = React.memo(
+    ({ 
+      myRole, 
+      shareLinkLoading, 
+      generateShareLink 
+    }:{myRole : string,shareLinkLoading: boolean,generateShareLink: (access:string) => void;}) => {
+      console.log("ShareLinkButton rendered"); // Keep for debugging
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="outline" 
+              className="text-blue-700 border-blue-300 hover:bg-blue-50"
+              disabled={shareLinkLoading || myRole === 'VIEWER'}
+            >
+              {shareLinkLoading ? (
+                <Loader2 className="mr-2 animate-spin" />
+              ) : (
+                <Share2 className="mr-2 h-4 w-4 text-blue-600" />
+              )}
+              Share Link
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem
+              onClick={() => generateShareLink('VIEWER')}
+              className="cursor-pointer"
+            >
+              Share as Viewer
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => generateShareLink('EDITOR')}
+              className="cursor-pointer"
+            >
+              Share as Editor
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+    // Custom comparison function
+    (prevProps, nextProps) => {
+      return (
+        prevProps.myRole === nextProps.myRole &&
+        prevProps.shareLinkLoading === nextProps.shareLinkLoading
+      );
+    }
+  );
+
+  export const CurrentWriterStatus = React.memo(
+    ({ currentWriter, lock ,myRole,unsaved}: { currentWriter: string | null, lock: boolean,myRole: string,unsaved: boolean; }) => {
+      // Only render if there's an active writer and the document is locked
+      if (!currentWriter || !lock) return null;
+      console.log(unsaved)
+  
+      return (
+        <div className="flex flex-row items-center justify-between px-2">
+        <div className="text-sm text-blue-600 mt-2 flex items-center justify-between">
+        {lock && myRole != 'VIEWER' ? <FileLock2 className="text-red-600" /> : null}
+        {currentWriter && lock ? <p className="font-bold px-3">Currently {currentWriter} is editing</p> : null}
+        </div>
+        {unsaved ? <p className="text-red-500 font-medium px-3">{"Unsaved changes"}</p> : null}
+        </div>
+      );
+    },
+    // Custom comparison function to prevent unnecessary re-renders
+    (prevProps, nextProps) => {
+      return (
+        prevProps.currentWriter === nextProps.currentWriter &&
+        prevProps.lock === nextProps.lock &&
+        prevProps.myRole === nextProps.myRole &&
+        prevProps.unsaved === nextProps.unsaved
+      );
+    }
+  );
+ 
+  
+
 function DocumentViewer() {
    
     const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -135,10 +246,9 @@ function DocumentViewer() {
     //const [myRole,setMyRole] = useState(role);
     const [lock,setLock] = useState(false);
     const typingTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null); // Ref for debouncing timer
-    const DEBOUNCE_DELAY = 10000;
+    const DEBOUNCE_DELAY = 5000;
     const navigate = useNavigate();
     
-    console.log(myRole)
     
 
     useEffect(() => {
@@ -206,7 +316,7 @@ function DocumentViewer() {
     };
     
     ws.onmessage = (e: MessageEvent) => {
-      setUnsaved(true);
+   
       const data = JSON.parse(e.data);
       
       switch(data.type) {
@@ -220,7 +330,9 @@ function DocumentViewer() {
           setLock(!!data.lock);
           break;
         case 'update-lock':
-          setLock(!!data.lock);
+        if(lock != true) {
+          setLock(true);
+        }
           break;
         case 'release-lock':
           setLock(false);
@@ -269,6 +381,9 @@ function DocumentViewer() {
                 description: `Document has been saved by ${data.name}`,
                 duration: 2000,
             })
+            break;
+        case 'update-unsaved':
+            setUnsaved(data.unsaved);
             break;
       }
     };
@@ -346,7 +461,7 @@ function DocumentViewer() {
 
     const sendData = (value: string,delta:any, source: any) => {
         console.log(delta)
-        if (source === 'user') {
+        if (source === 'user' && myRole != 'VIEWER') {
             // Clear any existing timer
             if (typingTimerRef.current) {
                 clearTimeout(typingTimerRef.current);
@@ -370,6 +485,11 @@ function DocumentViewer() {
                     userId: auth?.user?.id,
                     docId: doc,
                     lock: true
+                }))
+                socket.send(JSON.stringify({
+                    type: 'update-unsaved',
+                    userId: auth?.user?.id,
+                    docId: doc,
                 }))
             }
         }
@@ -552,7 +672,7 @@ function DocumentViewer() {
                 },
                 withCredentials: true,
             });
-            const link = `${process.env.BASE_URL}/verify/${res.data.token}`;
+            const link = `https://collabdocs-backend.onrender.com/verify/${res.data.token}`;
             navigator.clipboard.writeText(link)
             .then(() => {
                 toast({
@@ -565,9 +685,9 @@ function DocumentViewer() {
             .catch((err) => {
                 console.error('Failed to copy text: ', err);
             });
-            console.log(res.data);
             
         } catch (error) {
+            console.log(error)
             toast({
                 title: "Share Link Error",
                 description: "Failed to generate share link",
@@ -666,50 +786,9 @@ function DocumentViewer() {
                                     </CardDescription>
                                 </div>
                                 <div className="flex items-center justify-center gap-2 space-x-2">
-                                <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button 
-                                                variant="outline" 
-                                                className="text-blue-700 border-blue-300 hover:bg-blue-50"
-                                                disabled={shareLinkLoading || myRole === 'VIEWER'}
-                                            >
-                                                {shareLinkLoading ? (
-                                                    <Loader2 className="mr-2 animate-spin" />
-                                                ) : (
-                                                    <Share2 className="mr-2 h-4 w-4 text-blue-600" />
-                                                )}
-                                                Share Link
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent>
-                                            <DropdownMenuItem
-                                                onClick={() => {
-                                                    generateShareLink('VIEWER');
-                                                }}
-                                                className="cursor-pointer"
-                                            >
-                                                Share as Viewer
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem 
-                                                onClick={() => {
-                                                    generateShareLink('EDITOR');;
-                                                }}
-                                                className="cursor-pointer"
-                                            >
-                                                Share as Editor
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                    <Button 
-                                        disabled={versionLoading || myRole === 'VIEWER'}
-                                        className="bg-blue-600 text-white hover:bg-blue-700"
-                                        onClick={openVersionDialog}
-                                    >
-                                        <History />
-                                        Save Version
-                                        
-                                    </Button>
-                                    {lock && myRole != 'VIEWER' ?<FileLock2 className="text-red-600" /> : null}
+                                    <SaveVersionComponent versionLoading={versionLoading} openVersionDialog={openVersionDialog} myRole={myRole} />
+                                <ShareLinkButton myRole={myRole} shareLinkLoading={shareLinkLoading} generateShareLink={generateShareLink} />
+                                    
                                 </div>
                             </CardHeader>
                             <CardContent className="pt-4">
@@ -721,12 +800,17 @@ function DocumentViewer() {
                                     readOnly={myRole === 'VIEWER' || lock}
                                     className={`h-[68vh] ${isReadOnly || lock ? 'cursor-not-allowed opacity-60' : ''}`}
                                 />
-                                {currentWriter && (
-                                    <div className="text-sm text-blue-600 mt-2 flex items-center justify-between">
-                                        {lock ? <p className="font-bold px-3">Currently {currentWriter} is editing</p> : null}
-                                        {unsaved ? <p className="text-red-500 font-medium px-3">{"Unsaved changes"}</p> : null}
-                                    </div>
-                                )}
+                                
+                                    
+                                <div className="flex flex-row items-center justify-between px-2">
+        <div className="text-sm text-blue-600 mt-2 flex items-center justify-between">
+        {lock && myRole != 'VIEWER' ? <FileLock2 className="text-red-600" /> : null}
+        {currentWriter && lock ? <p className="font-bold px-3">Currently {currentWriter} is editing</p> : null}
+        </div>
+        {unsaved ? <p className="text-red-500 font-medium px-3">{"Unsaved changes"}</p> : null}
+        </div>
+                                
+                                
                             </CardContent>
                             <CardFooter className="mt-8">
                                 {myRole === 'VIEWER' ? null : <Button disabled={saveLoading} className="w-[130px] bg-blue-600 hover:bg-blue-500" onClick={saveDocument} >{saveLoading ? <p className="flex items-center gap-2"><Loader2 className="animate-spin" /> Saving..</p> : "Save Document"}</Button>}

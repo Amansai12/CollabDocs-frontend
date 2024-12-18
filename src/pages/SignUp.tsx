@@ -171,7 +171,7 @@ export const SignupPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
       >
-        <Card className="relative min-w-[500px] z-10 w-full max-w-md bg-white/90 backdrop-blur-sm shadow-2xl border-2 border-blue-100">
+        <Card className="relative min-w-[360px] md:min-w-[500px] z-10 w-full max-w-md bg-white/90 backdrop-blur-sm shadow-2xl border-2 border-blue-100">
           <CardHeader className="text-center bg-blue-600/10 border-b border-blue-200 py-6">
             <div className="flex justify-center mb-4">
               <motion.div 

@@ -55,7 +55,11 @@ const DocumentVersions: React.FC<DocumentVersionsProps> = ({
     const handleDelete = (versionId: string) => {
         onDeleteVersion && onDeleteVersion(versionId);
     };
-
+    function parseHTMLToText(htmlString : string) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlString, "text/html");
+        return doc.body.textContent || "";
+      }
     return (
         <Card className="w-full dark:bg-blue-950 shadow-lg rounded-xl border border-blue-200 dark:border-blue-900">
             <CardHeader className="p-4 bg-blue-50 border-b border-blue-200 dark:border-blue-900">
@@ -83,14 +87,14 @@ const DocumentVersions: React.FC<DocumentVersionsProps> = ({
                             {versions.map((version, index) => (
                                 <div 
                                     key={version.id} 
-                                    className="p-4 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors flex items-start space-x-4"
+                                    className="p-4 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors flex items-start space-x-4 "
                                 >
                                     <div className="flex-grow min-w-0">
-                                        <div className="flex items-center justify-between mb-1">
+                                        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-1">
                                             <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-200 truncate">
                                                 {version.name || `Version ${index + 1}`}
                                             </h3>
-                                            <div className='flex items-center justify-center gap-2'>
+                                            <div className='flex items-center justify-center gap-1'>
                                                 <span className="text-xs text-blue-500 dark:text-blue-400">
                                                     {formatDate(version.createdAt)}
                                                 </span>
@@ -126,8 +130,9 @@ const DocumentVersions: React.FC<DocumentVersionsProps> = ({
                                         <p className="text-xs text-blue-500 dark:text-blue-400 truncate mb-2">
                                             {version.id}
                                         </p>
+                                        
                                         <pre className="text-xs text-blue-700 dark:text-blue-300 line-clamp-2 overflow-hidden">
-                                            {version.content.length === 0 ? "No content" : version.content.slice(0, 100) + '...'}
+                                            {version.content.length === 0 ? "No content" : parseHTMLToText(version.content).slice(0, 100) + '...'}
                                         </pre>
                                     </div>
                                 </div>

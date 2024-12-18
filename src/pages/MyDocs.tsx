@@ -70,6 +70,11 @@ const DocumentCard: React.FC<{
     month: "long",
     day: "numeric",
   });
+  function parseHTMLToText(htmlString : string) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlString, "text/html");
+    return doc.body.textContent || "";
+  }
   
   const getAccessIcon = () => {
     switch (data.role) {
@@ -153,7 +158,7 @@ const DocumentCard: React.FC<{
         </CardHeader>
         <CardContent className="py-3">
           <p className="text-md text-slate-600 line-clamp-2 truncate opacity-80">
-            {data.content || "No content yet"}
+            {parseHTMLToText(data.content) || "No content yet"}
           </p>
         </CardContent>
         <CardFooter className="flex justify-between text-xs text-slate-500">
