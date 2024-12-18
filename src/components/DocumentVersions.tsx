@@ -61,7 +61,7 @@ const DocumentVersions: React.FC<DocumentVersionsProps> = ({
         return doc.body.textContent || "";
       }
     return (
-        <Card className="w-full dark:bg-blue-950 shadow-lg rounded-xl border border-blue-200 dark:border-blue-900">
+        <Card className="w-full dark:bg-blue-950 shadow-lg rounded-xl border border-blue-200 dark:border-blue-900 overflow-x-hidden">
             <CardHeader className="p-4 bg-blue-50 border-b border-blue-200 dark:border-blue-900">
                 <CardTitle className="text-xl font-bold text-blue-800 dark:text-blue-200">
                     Document Versions

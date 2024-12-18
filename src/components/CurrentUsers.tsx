@@ -99,7 +99,7 @@ const CurrentUsers: React.FC<CurrentUsersProps> = ({
 
     return (
         <TooltipProvider>
-            <Card className="w-full dark:bg-blue-900/30 shadow-lg rounded-xl border border-blue-200 dark:border-blue-800">
+            <Card className="w-full dark:bg-blue-900/30 shadow-lg rounded-xl border border-blue-200 dark:border-blue-800 overflow-hidden">
                 <CardHeader className="p-4 bg-blue-50 border-b border-blue-200 dark:border-blue-700">
                     <CardTitle className="text-xl font-bold text-blue-800 dark:text-blue-200 flex items-center">
                         <User className="mr-2 h-5 w-5 text-blue-600 dark:text-blue-300" />

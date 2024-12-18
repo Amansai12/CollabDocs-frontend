@@ -336,7 +336,7 @@ export default function MyDocs() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-8 min-h-[80vh]"
+        className="mb-8"
       >
         <div className="flex items-center mb-4 space-x-3">
           {icon}
