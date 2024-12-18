@@ -362,6 +362,7 @@ function DocumentViewer() {
                 toast({
                     title:"New Version Added",
                     description: `New version added to document by ${data.name}`,
+                    duration: 2000,
                 })
             }
             break
@@ -371,6 +372,7 @@ function DocumentViewer() {
                 toast({
                     title:"Version Deleted",
                     description: `Version ${data.versionId} has been deleted by ${data.name}`,
+                    duration: 2000,
                 })
             }
             break
@@ -385,6 +387,14 @@ function DocumentViewer() {
         case 'update-unsaved':
             setUnsaved(data.unsaved);
             break;
+        case 'rollback':
+            setText(data.data);
+            toast({
+                title:"Document Rolled Back",
+                description: `Document has been rolled back to version ${data.rollBackId} by ${data.name}`,
+                duration: 2000,
+            })
+            break
       }
     };
     
@@ -645,6 +655,15 @@ function DocumentViewer() {
                 duration: 2000
             });
 
+            socket?.send(JSON.stringify({
+                type :'rolledback',
+                docId: currDoc?.id,
+                userId: auth?.user?.id,
+                data : res.data.updatedDoc.content,
+                name : auth?.user?.name,
+                rollBackId : rollbackVersionId
+            }))
+
             // Close the confirmation dialog
             setRollbackConfirmDialogOpen(false);
             setRollbackVersionId(null);
@@ -672,7 +691,8 @@ function DocumentViewer() {
                 },
                 withCredentials: true,
             });
-            const link = `https://collabdocs-backend.onrender.com/verify/${res.data.token}`;
+            
+            const link = `https://collab-desk-amber.vercel.app/verify/${res.data.token}`;
             navigator.clipboard.writeText(link)
             .then(() => {
                 toast({
@@ -691,7 +711,8 @@ function DocumentViewer() {
             toast({
                 title: "Share Link Error",
                 description: "Failed to generate share link",
-                variant: "destructive"
+                variant: "destructive",
+                duration: 2000
             });
         }finally{
             setShareLinkLoading(false)
