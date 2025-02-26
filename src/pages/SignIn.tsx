@@ -149,13 +149,7 @@ export const SigninPage = () => {
       const response = await axios.post(`${BACKEND_URL}/user/signin`, formData);
       localStorage.setItem('token', response.data.token);
       setAuth(response.data);
-      const verification = localStorage.getItem('verification');
-      if(verification) {
-        navigate(verification);
-        localStorage.removeItem('verification');
-      }else{
-        navigate('/')
-      }
+      navigate('/')
     }catch (error : any) {
       console.error('Login Error:', error);
       if(error.status == 400){

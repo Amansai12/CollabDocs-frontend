@@ -140,9 +140,7 @@ export const SignupPage = () => {
     }
   };
 
-  // const handleGoogleSignup = () => {
-  //   console.log('Google Signup Initiated');
-  // };
+
 
   const pageVariants = {
     initial: { opacity: 0, scale: 0.95 },

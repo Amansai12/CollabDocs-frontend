@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { BACKEND_URL } from "@/config";
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
+import {  useNavigate, useParams } from "react-router-dom";
 import { ShieldCheck, Loader2, AlertTriangle } from "lucide-react";
 import { useRecoilValue } from "recoil";
 import { authAtom } from "@/store/auth";
@@ -12,11 +12,13 @@ function Verification() {
     const navigate = useNavigate();
     const token = useParams().token;
     const auth = useRecoilValue(authAtom)
+   useEffect(()=>{
     if(!auth.user) {
-        localStorage.setItem('verification', `/verify/${token}`);
+        // localStorage.setItem('verification', `/verify/${token}`);
         navigate('/signin')
         return
     }
+   },[auth])
     useEffect(() => {
         const verify = async () => {
             setLoading(true);
